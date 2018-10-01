@@ -1,0 +1,73 @@
+---
+- name: Juniper compliance check
+  hosts: leaf
+  roles:
+  - Juniper.junos
+  gather_facts: False
+  connection: local
+
+  tasks:
+  - name: Clean diff directory
+    local_action:
+      module: file 
+      path: "./tmp/pb-junos-diff/"
+      state: absent
+  - name: Create diff directory
+    local_action:
+      module: file
+      path: "./tmp/pb-junos-diff"
+      state: directory
+
+  - name: generate
+    local_action: script ./generate.py {{ inventory_hostname }}
+
+  - name: saving existing config from remote device to compare
+    juniper_junos_config:
+      retrieve: 'committed'
+      filter_xml: '<configuration><system/><snmp/></configuration>'
+      host: "{{ inventory_hostname }}"
+      dest: "./tmp/pb-junos-diff/{{ inventory_hostname }}.device.text"
+
+  - name: convert device config to set format
+    local_action: script /usr/local/bin/junoser -d ./tmp/pb-junos-diff/{{ inventory_hostname }}.device.text >./tmp/pb-junos-diff/{{ inventory_hostname }}.device.set
+
+  - name: saving temporarily loaded config from device
+    juniper_junos_config:
+      load: 'override'
+      commit: False
+      src: "./tmp/pb-junos-diff/{{ inventory_hostname }}.gold.text"
+      retrieve: 'candidate'
+      filter_xml: '<configuration><system/><snmp/></configuration>'
+      host: "{{ inventory_hostname }}"
+      dest: "./tmp/pb-junos-diff/{{ inventory_hostname }}.gold-candidate.text"
+
+  - name: convert golden config to set format
+    local_action: script /usr/local/bin/junoser -d ./tmp/pb-junos-diff/{{ inventory_hostname }}.gold-candidate.text >./tmp/pb-junos-diff/{{ inventory_hostname }}.gold.set
+
+- name: compare
+  hosts: leaf
+  gather_facts: False
+  vars:
+    - gold_config: "./tmp/pb-junos-diff/{{ inventory_hostname }}.gold.set"
+    - device_config: "./tmp/pb-junos-diff/{{ inventory_hostname }}.device.set"
+  tasks:
+    - local_action: script ./junos-diff.py {{ gold_config }} {{ device_config }}
+      register: compy
+
+    - debug:
+         msg: "{{ compy.stdout_lines }}"
+
+### optional, write the changes to disk
+- name: compare - output to files
+  hosts: leaf
+  gather_facts: False
+  vars:
+    - gold_config: "./tmp/pb-junos-diff/{{ inventory_hostname }}.gold.set"
+    - device_config: "./tmp/pb-junos-diff/{{ inventory_hostname }}.device.set"
+  tasks:
+    - local_action: script ./junos-diff.py {{ gold_config }} {{ device_config }} > ./tmp/pb-junos-diff/changes-{{ inventory_hostname }}.set
+
+## Next steps
+## show the config which will be changed, pause here
+## allow to break out of play if change isn't safe
+## if safe, then push to device

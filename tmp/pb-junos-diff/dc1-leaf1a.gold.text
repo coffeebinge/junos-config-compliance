@@ -1,0 +1,213 @@
+system {
+    host-name dc1-leaf1a;
+    auto-snapshot;
+    domain-name arpthis.net;
+    time-zone America/Los_Angeles;
+    arp {
+        aging-timer 5;
+    }
+    internet-options {
+        tcp-drop-synfin-set;
+    }
+    authentication-order [ password radius ];
+    ports {
+        console log-out-on-disconnect;
+        auxiliary {
+            disable;
+            insecure;
+        }
+    }
+    root-authentication {
+        encrypted-password "$6$jJtJzKNY$ae59syphgyFSFi75Mt9l3BHXz8oxrQnFJ/8ZlQkZSL4ej.MKXiyOIiqmsm/5OXCsvGcvDjmw7f0pIbHTdIFpt/";
+    }
+    name-server {
+        8.8.8.8;
+        8.8.4.4;
+    }
+    radius-server {
+        1.1.1.1 {
+            port 1812;
+            accounting-port 1813;
+            secret "$9$m5zntu1ylM/ClM8XbwmfTz/C";
+            source-address 192.168.88.51;
+        }
+        2.2.2.2 {
+            port 1812;
+            accounting-port 1813;
+            secret "$9$m5zntu1ylM/ClM8XbwmfTz/C";
+            source-address 192.168.88.51;
+        }
+    }
+    radius-options {
+        attributes {
+            nas-ip-address 192.168.88.51;
+        }
+    }
+    login {
+        message "\n\n\n\t       * * *  W A R N I N G  * * *\n\tProperty of the ABC CORP\n\nIf you are not authorized to access this system, disconnect now.\nUsers of this system have no expectation of privacy. By continuing,\nyou consent to your keystrokes and data content being monitored.\n\n";
+        retry-options {
+            tries-before-disconnect 3;
+            backoff-threshold 1;
+            backoff-factor 6;
+            minimum-time 30;
+        }
+        class SUPER-USER-REMOTE {
+            idle-timeout 10;
+            permissions all;
+        }
+        user ansible {
+            uid 2001;
+            class super-user;
+            authentication {
+                ssh-rsa "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFLSYKW+I2qjeteBEp11YjnmzhsLiPmGFUqiuiYKh1wkhaxDHeF49ZRej2xZ85+yYcbxV6JDrGEsi3UZDI4Kii3sSgDw1uMCg/nxSyXxRwLSL3B++qylf1p1PX+dSMXhaocvuLZLurfq5S9pcWYdrb+F8SWvDfcKCj9yLVPcNY+TQ2YCNarPw7B3/am6S+In0a6trgnwry5RppeEn1CaAD57vc/WeEcd3WGYmlWOjNIhm08vcrv2HIKF6uNcuRCbMKWMqwn2lP/b0cR7XvO1ZUyvUu5m1pm0z/k6rvKGd1LOKuI2/oKOKMB4ZvzXSkO1OhGuXceykkRVTzt82xM3tB ansible@control";
+            }
+        }
+        user remote {
+            full-name ACS-Remote-User;
+            uid 9999;
+            class SUPER-USER-REMOTE;
+        }
+    }
+    services {
+        ssh {
+            root-login allow;
+            protocol-version v2;
+        }
+        netconf {
+            ssh {
+                connection-limit 10;
+                rate-limit 60;
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        host 192.168.88.11 {
+            any notice;
+            authorization any;
+            firewall any;
+            interactive-commands any;
+            explicit-priority;
+        }
+        file messages {
+            any any;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+        source-address 192.168.88.51;
+    }
+    extensions {
+        providers {
+            juniper {
+                license-type juniper deployment-scope commercial;
+            }
+            chef {
+                license-type juniper deployment-scope commercial;
+            }
+        }
+    }
+    commit synchronize;
+    processes {
+        app-engine-virtual-machine-management-service {
+            traceoptions {
+                level notice;
+                flag all;
+            }
+        }
+    }
+    ddos-protection {
+        protocols {
+            bgp {
+                aggregate {
+                    bandwidth 20000;
+                    burst 20000;
+                }
+            }
+        }
+    }
+    ntp {
+        authentication-key 1 type md5 value "$9$zopTn9t1RSM87uO87-V4oz369uO";
+        server 10.23.250.1 key 1;
+        server 10.23.250.2 key 1;
+        trusted-key 1;
+    }
+}
+snmp {
+    location b171-vault;
+    v3 {
+        usm {
+            local-engine {
+                user SPECTRUM-RTR {
+                    authentication-md5 {
+                        authentication-password "Juniper1234567890"; ## SECRET-DATA
+                    }
+                }
+            }
+        }
+        vacm {
+            security-to-group {
+                security-model usm {
+                    security-name SPECTRUM-RTR {
+                        group SNMPV3Group;
+                    }
+                }
+            }
+            access {
+                group SNMPV3Group {
+                    default-context-prefix {
+                        security-model usm {
+                            security-level authentication {
+                                read-view all;
+                                notify-view all;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        target-address SOLARWINDS {
+            address 192.168.88.15;
+            tag-list chassis-trap-receivers;
+            target-parameters noc-snmpv3-settings;
+        }
+        target-parameters noc-snmpv3-settings {
+            parameters {
+                message-processing-model v3;
+                security-model usm;
+                security-level authentication;
+                security-name SPECTRUM-RTR;
+            }
+            notify-filter chassis-traps;
+        }
+        notify chassis-trap-list {
+            type trap;
+            tag chassis-trap-receivers;
+        }
+        notify config-trap-list {
+            type trap;
+            tag config-trap-receivers;
+        }
+        notify-filter chassis-traps {
+            oid jnxChassisTraps include;
+            oid jnxChassisOKTraps include;
+            oid .1;
+        }
+        notify-filter config-traps {
+            oid jnxCmNotifications include;
+        }
+    }
+    view all {
+        oid .1 include;
+        oid jnxBoxAnatomy include;
+        oid snmpMIBObjects include;
+        oid system;
+    }
+    community "abcv2";
+    trap-options {
+        source-address 192.168.88.51;
+    }
+}

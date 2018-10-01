@@ -1,0 +1,12 @@
+---
+radiuskey: $9$m5zntu1ylM/ClM8XbwmfTz/C
+netmanagement: abcn
+netmanagement2: abcn2
+noc: abcnoc
+root: $6$jJtJzKNY$ae59syphgyFSFi75Mt9l3BHXz8oxrQnFJ/8ZlQkZSL4ej.MKXiyOIiqmsm/5OXCsvGcvDjmw7f0pIbHTdIFpt/
+snmpv2: abcv2
+snmpv3: Juniper1234567890
+ansiblesshrsa: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFLSYKW+I2qjeteBEp11YjnmzhsLiPmGFUqiuiYKh1wkhaxDHeF49ZRej2xZ85+yYcbxV6JDrGEsi3UZDI4Kii3sSgDw1uMCg/nxSyXxRwLSL3B++qylf1p1PX+dSMXhaocvuLZLurfq5S9pcWYdrb+F8SWvDfcKCj9yLVPcNY+TQ2YCNarPw7B3/am6S+In0a6trgnwry5RppeEn1CaAD57vc/WeEcd3WGYmlWOjNIhm08vcrv2HIKF6uNcuRCbMKWMqwn2lP/b0cR7XvO1ZUyvUu5m1pm0z/k6rvKGd1LOKuI2/oKOKMB4ZvzXSkO1OhGuXceykkRVTzt82xM3tB ansible@control
+ntpkey: $9$zopTn9t1RSM87uO87-V4oz369uO
+ospfkey: $9$rvolWLxNdw24Xxik.PQzreK8-VaZUjqmM8xdsYZGHqmfT3tpB
+bgpkey: $9$rjyKWXVwgUjq7-jqmfn6revW7-

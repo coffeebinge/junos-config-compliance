@@ -1,0 +1,134 @@
+---
+## Datacenter 1 global file
+dcid: 3
+domain: arpthis.net
+timezone: America/Los_Angeles
+dns:
+  - 8.8.8.8
+  - 8.8.4.4
+
+radius:
+  - 1.1.1.1
+  - 2.2.2.2
+
+ntp-spine:
+ - 192.168.88.10
+
+ntp-leaf:
+  - 10.23.250.1
+  - 10.23.250.2
+
+syslog:
+  - 192.168.88.11
+
+mgmt-nh: 192.168.88.1
+
+dhcp-server:
+  - 10.100.100.53
+
+
+loginmsg: \n\n\n\t       * * *  W A R N I N G  * * *\n\tProperty of the ABC CORP\n\nIf you are not authorized to access this system, disconnect now.\nUsers of this system have no expectation of privacy. By continuing,\nyou consent to your keystrokes and data content being monitored.\n\n
+
+policy-prefix-list:
+  mgmt-nets: 
+    - 192.168.88.0/24
+  snmp-servers:
+    - 192.168.88.0/24
+  ntp-clients:
+    - 10.0.0.0/8
+    - 172.0.0.0/8
+    - 192.168.88.0/24
+  syslog-servers:
+    - 192.168.88.0/24
+  leaf-loopbacks:
+    - 10.23.254.0/24
+    - 10.23.255.0/24
+    - 10.21.254.0/24
+    - 10.21.255.0/24
+  ospf-links:
+    - 172.23.0.0/16
+    - 172.21.0.0/16
+    - 172.20.0.0/16
+  spine-loopbacks:
+    - 10.23.250.0/24
+    - 10.21.250.0/24
+  core-loopbacks:
+    - 10.20.250.0/24 
+    - 10.20.249.0/24 
+
+snmp:
+  targets:
+    - {name: SOLARWINDS, addr: 192.168.88.15}
+
+vrflist:
+  - {id: underlay, type: False, value: 1}
+  - {id: dc, type: vrf, value: 3010}
+  - {id: dmz, type: vrf, value: 3020}
+  - {id: guest, type: vrf, value: 3030}
+  - {id: iot, type: vrf, value: 3050}
+
+datavlans:
+  - {id: 1001, l3-enabled: True, vrfid: dc, v4-mac: "00:00:10:01:00:01", ip-prefix: 10.1.0, bitmask: 16, v6-mac: "00:06:10:01:00:01", ip6-prefix: "2001:db8:a1:0::", ip6-bitmask: 64, ip6-ll: "fe80::10:01:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: campus}
+  - {id: 100, l3-enabled: True, vrfid: dc, v4-mac: "00:00:01:00:00:01", ip-prefix: 10.100.100, bitmask: 24, v6-mac: "00:06:01:00:00:01", ip6-prefix: "2001:db8:a64:64::", ip6-bitmask: 64, ip6-ll: "fe80::01:00:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: vlan100}
+  - {id: 101, l3-enabled: True, vrfid: dc, v4-mac: "00:00:01:01:00:01", ip-prefix: 10.100.101, bitmask: 24, v6-mac: "00:06:01:01:00:01", ip6-prefix: "2001:db8:a64:65::", ip6-bitmask: 64, ip6-ll: "fe80::01:01:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: vlan101}
+  - {id: 102, l3-enabled: True, vrfid: dmz, v4-mac: "00:00:01:02:00:01", ip-prefix: 10.100.102, bitmask: 24, v6-mac: "00:06:01:00:02:01", ip6-prefix: "2001:db8:a64:66::", ip6-bitmask: 64, ip6-ll: "fe80::01:02:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: dmz-vlan102}
+  - {id: 103, l3-enabled: True, vrfid: dmz, v4-mac: "00:00:01:03:00:01", ip-prefix: 10.100.103, bitmask: 24, v6-mac: "00:06:01:00:03:01", ip6-prefix: "2001:db8:a64:67::", ip6-bitmask: 64, ip6-ll: "fe80::01:03:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: dmz-vlan103}
+  - {id: 104, l3-enabled: True, vrfid: guest, v4-mac: "00:00:01:04:00:01", ip-prefix: 10.100.104, bitmask: 24, v6-mac: "00:06:01:04:00:01", ip6-prefix: "2001:db8:a64:68::", ip6-bitmask: 64, ip6-ll: "fe80::01:04:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: guest-vlan104}
+  - {id: 105, l3-enabled: True, vrfid: guest, v4-mac: "00:00:01:05:00:01", ip-prefix: 10.100.105, bitmask: 24, v6-mac: "00:06:01:05:00:01", ip6-prefix: "2001:db8:a64:69::", ip6-bitmask: 64, ip6-ll: "fe80::01:05:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: guest-vlan105}
+  - {id: 106, l3-enabled: True, vrfid: iot, v4-mac: "00:00:01:06:00:01", ip-prefix: 10.100.106, bitmask: 24, v6-mac: "00:06:01:06:00:01", ip6-prefix: "2001:db8:a64:6a::", ip6-bitmask: 64, ip6-ll: "fe80::01:06:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: iot-vlan106}
+  - {id: 107, l3-enabled: True, vrfid: iot, v4-mac: "00:00:01:07:00:01", ip-prefix: 10.100.107, bitmask: 24, v6-mac: "00:06:01:07:00:01", ip6-prefix: "2001:db8:a64:6b::", ip6-bitmask: 64, ip6-ll: "fe80::01:07:00:01", irb-virt: 1, irb-vga1: 2, irb-vga2: 3, description: iot-vlan107}
+
+######################################################################
+## all-spines is used to generate OVERLAY-IN policy for leaf nodes
+## important if you do L2 stretch
+
+all-spines:
+ - {name: dc1-spine1, loop: 10.23.250.1, fabid: 3}
+ - {name: dc1-spine2, loop: 10.23.250.2, fabid: 3}
+ - {name: dc2-spine1, loop: 10.28.250.1, fabid: 8}
+ - {name: dc2-spine2, loop: 10.28.250.2, fabid: 8}
+ - {name: campus-spine1, loop: 10.21.250.1, fabid: 1}
+ - {name: campus-spine2, loop: 10.21.250.2, fabid: 1}
+
+
+############################################
+## BGP section
+
+overlay-as: 64512
+
+underlay-as:
+  - {device: dc1-spine1, as: 65031}
+  - {device: dc1-spine2, as: 65032}
+  - {device: dc1-leaf1a, as: 65101}
+  - {device: dc1-leaf1b, as: 65201}
+
+service-id:
+  - {device: dc1-leaf1a, id: 5377}
+  - {device: dc1-leaf1b, id: 5377}
+
+bgp-neigh:
+  - {device: dc1-spine1, group: "IBGP-SPINES", ebgp-ip: False, peer-as: False, ibgp-ip: 10.23.250.2, desc: dc1-spine2}
+  - {device: dc1-spine1, group: "IBGP-LEAVES", ebgp-ip: 172.23.1.1, peer-as: 65101, ibgp-ip: 10.23.255.1, desc: dc1-leaf1a}
+  - {device: dc1-spine1, group: "IBGP-LEAVES", ebgp-ip: 172.23.2.1, peer-as: 65201, ibgp-ip: 10.23.254.1, desc: dc1-leaf1b}
+  - {device: dc1-spine1, group: "IBGP-CORE", ebgp-ip: 172.20.0.0, peer-as: 65001, ibgp-ip: 10.20.250.1, desc: ss1}
+  - {device: dc1-spine1, group: "IBGP-CORE", ebgp-ip: 172.20.1.0, peer-as: 65002, ibgp-ip: 10.20.250.2, desc: ss2}
+
+##
+  - {device: dc1-spine2, group: "IBGP-SPINES", ebgp-ip: False, peer-as: False, ibgp-ip: 10.23.250.1, desc: dc1-spine1}
+  - {device: dc1-spine2, group: "IBGP-LEAVES", ebgp-ip: 172.23.3.1, peer-as: 65101, ibgp-ip: 10.23.255.1, desc: dc1-leaf1a}
+  - {device: dc1-spine2, group: "IBGP-LEAVES", ebgp-ip: 172.23.4.1, peer-as: 65201, ibgp-ip: 10.23.254.1, desc: dc1-leaf1b}
+  - {device: dc1-spine2, group: "IBGP-CORE", ebgp-ip: 172.20.0.2, peer-as: 65001, ibgp-ip: 10.20.250.1, desc: ss1}
+  - {device: dc1-spine2, group: "IBGP-CORE", ebgp-ip: 172.20.1.2, peer-as: 65002, ibgp-ip: 10.20.250.2, desc: ss2}
+
+##
+  - {device: dc1-leaf1a, group: "IBGP-SPINES", ebgp-ip: 172.23.1.0, peer-as: 65031, ibgp-ip: 10.23.250.1, desc: dc1-spine1}
+  - {device: dc1-leaf1a, group: "IBGP-SPINES", ebgp-ip: 172.23.3.0, peer-as: 65032, ibgp-ip: 10.23.250.2, desc: dc1-spine2}
+  - {device: dc1-leaf1b, group: "IBGP-SPINES", ebgp-ip: 172.23.2.0, peer-as: 65031, ibgp-ip: 10.23.250.1, desc: dc1-spine1}
+  - {device: dc1-leaf1b, group: "IBGP-SPINES", ebgp-ip: 172.23.4.0, peer-as: 65032, ibgp-ip: 10.23.250.2, desc: dc1-spine2}
+
+ae-members:
+  - {int: "xe-0/0/46", ae-id: ae4, desc: ex4300-3 access layer}
+  - {int: "xe-0/0/47", ae-id: ae4, desc: ex4300-3 access layer}
+
+ae-ints:
+  - {int: ae4, mtu: 9216, addr: False, mask: False, system-id: "00:00:00:17:01:04", esi: "00:00:00:00:00:00:00:17:01:04", desc: ex4300-3 access layer, vlanlist: "[ VLAN100 VLAN101 VLAN102 VLAN103 VLAN104 VLAN105 VLAN106 VLAN107 VLAN1001 ]"}

@@ -1,0 +1,218 @@
+system {
+    host-name {{ USERINPUT['hostname'] }};
+    auto-snapshot;
+    domain-name {{ GLOBAL['domain'] }};
+    time-zone {{ GLOBAL['timezone'] }};
+    arp {
+        aging-timer 5;
+    }
+    internet-options {
+        tcp-drop-synfin-set;
+    }
+    authentication-order [ password radius ];
+    ports {
+        console log-out-on-disconnect;
+        auxiliary {
+            disable;
+            insecure;
+        }
+    }
+    root-authentication {
+        encrypted-password "{{ CREDS['root'] }}";
+    }
+    name-server {
+{% for d in GLOBAL['dns']%}
+        {{ d }};
+{% endfor %}
+    }
+    radius-server {
+{% for radius in GLOBAL['radius']%}
+        {{ radius }} {
+            port 1812;
+            accounting-port 1813;
+            secret "{{ CREDS['radiuskey'] }}";
+            source-address {{ USERINPUT['mgmt-addr'] }};
+        }
+{% endfor %}
+    }
+    radius-options {
+        attributes {
+            nas-ip-address {{ USERINPUT['mgmt-addr'] }};
+        }
+    }
+    login {
+        message "{{ GLOBAL['loginmsg'] }}";
+        retry-options {
+            tries-before-disconnect 3;
+            backoff-threshold 1;
+            backoff-factor 6;
+            minimum-time 30;
+        }
+        class SUPER-USER-REMOTE {
+            idle-timeout 10;
+            permissions all;
+        }
+        user ansible {
+            uid 2001;
+            class super-user;
+            authentication {
+                ssh-rsa "{{ CREDS['ansiblesshrsa'] }}";
+            }
+        }
+        user remote {
+            full-name ACS-Remote-User;
+            uid 9999;
+            class SUPER-USER-REMOTE;
+        }
+    }
+    services {
+        ssh {
+            root-login allow;
+            protocol-version v2;
+{# ############################################################# RE-ADD #}
+{#            connection-limit 5;
+            rate-limit 5;#}
+        }
+        netconf {
+            ssh {
+                connection-limit 10;
+                rate-limit 60;
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+{% for syslog in GLOBAL['syslog']%}
+        host {{ syslog }} {
+            any notice;
+            authorization any;
+            firewall any;
+            interactive-commands any;
+            explicit-priority;
+        }
+{% endfor %}
+        file messages {
+            any any;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+        source-address {{ USERINPUT['mgmt-addr'] }};
+    }
+    extensions {
+        providers {
+            juniper {
+                license-type juniper deployment-scope commercial;
+            }
+            chef {
+                license-type juniper deployment-scope commercial;
+            }
+        }
+    }
+    commit synchronize;
+    processes {
+        app-engine-virtual-machine-management-service {
+            traceoptions {
+                level notice;
+                flag all;
+            }
+        }
+    }
+    ddos-protection {
+        protocols {
+            bgp {
+                aggregate {
+                    bandwidth 20000;
+                    burst 20000;
+                }
+            }
+        }
+    }
+    ntp {
+        authentication-key 1 type md5 value "{{ CREDS['ntpkey'] }}";
+{% for NTP in GLOBAL['ntp-leaf'] %}
+        server {{ NTP }} key 1;
+{% endfor %}
+        trusted-key 1;
+    }
+}
+snmp {
+    location {{ USERINPUT['snmploc'] }};
+    v3 {
+        usm {
+            local-engine {
+                user SPECTRUM-RTR {
+                    authentication-md5 {
+                        authentication-password "{{ CREDS['snmpv3'] }}"; ## SECRET-DATA
+                    }
+                }
+            }
+        }
+        vacm {
+            security-to-group {
+                security-model usm {
+                    security-name SPECTRUM-RTR {
+                        group SNMPV3Group;
+                    }
+                }
+            }
+            access {
+                group SNMPV3Group {
+                    default-context-prefix {
+                        security-model usm {
+                            security-level authentication {
+                                read-view all;
+                                notify-view all;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+{% for TARGET in GLOBAL['snmp']['targets'] %}
+        target-address {{ TARGET['name'] }} {
+            address {{ TARGET['addr'] }};
+            tag-list chassis-trap-receivers;
+            target-parameters noc-snmpv3-settings;
+        }
+{% endfor %}
+        target-parameters noc-snmpv3-settings {
+            parameters {
+                message-processing-model v3;
+                security-model usm;
+                security-level authentication;
+                security-name SPECTRUM-RTR;
+            }
+            notify-filter chassis-traps;
+        }
+        notify chassis-trap-list {
+            type trap;
+            tag chassis-trap-receivers;
+        }
+        notify config-trap-list {
+            type trap;
+            tag config-trap-receivers;
+        }
+        notify-filter chassis-traps {
+            oid jnxChassisTraps include;
+            oid jnxChassisOKTraps include;
+            oid .1;
+        }
+        notify-filter config-traps {
+            oid jnxCmNotifications include;
+        }
+    }
+    view all {
+        oid .1 include;
+        oid jnxBoxAnatomy include;
+        oid snmpMIBObjects include;
+        oid system;
+    }
+    community "{{ CREDS['snmpv2'] }}";
+    trap-options {
+        source-address {{ USERINPUT['mgmt-addr'] }};
+    }
+}

@@ -1,0 +1,18 @@
+---
+hostname: dc1-leaf1a
+mgmt-addr: 192.168.88.51
+netmask: 255.255.255.0
+bitmask: 24
+defgw: 192.168.88.1
+snmploc: b171-vault
+basemodel: qfx5100
+
+loopbacks:
+  - {id: 0, addr-v4: 10.23.255.1, addr-v6: False, filter-v4: SERVICE-IN, filter-v6: SERVICE-IN-V6, vrf: inet.0}
+
+uplinks:
+  - {int: et-0/0/50, mtu: 9216, addr: 172.23.1.1, desc: dc1-spine1}
+  - {int: et-0/0/51, mtu: 9216, addr: 172.23.3.1, desc: dc1-spine2}
+
+interfaces:
+  - {int: ge-0/0/0, mtu: 9216, mode: trunk, vlanmember: "[ VLAN100 VLAN101 VLAN102 VLAN103 VLAN104 VLAN105 VLAN106 VLAN107 VLAN1001 ]", desc: ESXi server vmnic2}

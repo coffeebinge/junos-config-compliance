@@ -1,0 +1,88 @@
+set system host-name dc1-leaf1a
+set system auto-snapshot
+set system domain-name arpthis.net
+set system time-zone America/Los_Angeles
+set system arp aging-timer 5
+set system internet-options tcp-drop-synfin-set
+set system authentication-order password
+set system authentication-order radius
+set system ports console log-out-on-disconnect
+set system ports auxiliary disable
+set system ports auxiliary insecure
+set system root-authentication encrypted-password "$6$jJtJzKNY$ae59syphgyFSFi75Mt9l3BHXz8oxrQnFJ/8ZlQkZSL4ej.MKXiyOIiqmsm/5OXCsvGcvDjmw7f0pIbHTdIFpt/"
+set system name-server 8.8.8.8
+set system name-server 8.8.4.4
+set system radius-server 1.1.1.1 port 1812
+set system radius-server 1.1.1.1 accounting-port 1813
+set system radius-server 1.1.1.1 secret "$9$m5zntu1ylM/ClM8XbwmfTz/C"
+set system radius-server 1.1.1.1 source-address 192.168.88.51
+set system radius-server 2.2.2.2 port 1812
+set system radius-server 2.2.2.2 accounting-port 1813
+set system radius-server 2.2.2.2 secret "$9$m5zntu1ylM/ClM8XbwmfTz/C"
+set system radius-server 2.2.2.2 source-address 192.168.88.51
+set system radius-options attributes nas-ip-address 192.168.88.51
+set system login message "\n\n\n\t       * * *  W A R N I N G  * * *\n\tProperty of the ABC CORP\n\nIf you are not authorized to access this system, disconnect now.\nUsers of this system have no expectation of privacy. By continuing,\nyou consent to your keystrokes and data content being monitored.\n\n"
+set system login retry-options tries-before-disconnect 3
+set system login retry-options backoff-threshold 1
+set system login retry-options backoff-factor 6
+set system login retry-options minimum-time 30
+set system login class SUPER-USER-REMOTE idle-timeout 10
+set system login class SUPER-USER-REMOTE permissions all
+set system login user ansible uid 2001
+set system login user ansible class super-user
+set system login user ansible authentication ssh-rsa "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFLSYKW+I2qjeteBEp11YjnmzhsLiPmGFUqiuiYKh1wkhaxDHeF49ZRej2xZ85+yYcbxV6JDrGEsi3UZDI4Kii3sSgDw1uMCg/nxSyXxRwLSL3B++qylf1p1PX+dSMXhaocvuLZLurfq5S9pcWYdrb+F8SWvDfcKCj9yLVPcNY+TQ2YCNarPw7B3/am6S+In0a6trgnwry5RppeEn1CaAD57vc/WeEcd3WGYmlWOjNIhm08vcrv2HIKF6uNcuRCbMKWMqwn2lP/b0cR7XvO1ZUyvUu5m1pm0z/k6rvKGd1LOKuI2/oKOKMB4ZvzXSkO1OhGuXceykkRVTzt82xM3tB ansible@control"
+set system login user remote full-name ACS-Remote-User
+set system login user remote uid 9999
+set system login user remote class SUPER-USER-REMOTE
+set system services ssh root-login allow
+set system services ssh protocol-version v2
+set system services netconf ssh connection-limit 10
+set system services netconf ssh rate-limit 60
+set system syslog user * any emergency
+set system syslog host 192.168.88.11 any notice
+set system syslog host 192.168.88.11 authorization any
+set system syslog host 192.168.88.11 firewall any
+set system syslog host 192.168.88.11 interactive-commands any
+set system syslog host 192.168.88.11 explicit-priority
+set system syslog file messages any any
+set system syslog file messages authorization info
+set system syslog file interactive-commands interactive-commands any
+set system syslog source-address 192.168.88.51
+set system extensions providers juniper license-type juniper deployment-scope commercial
+set system extensions providers chef license-type juniper deployment-scope commercial
+set system commit synchronize
+set system processes app-engine-virtual-machine-management-service traceoptions level notice
+set system processes app-engine-virtual-machine-management-service traceoptions flag all
+set system ddos-protection protocols bgp aggregate bandwidth 20000
+set system ddos-protection protocols bgp aggregate burst 20000
+set system ntp authentication-key 1 type md5 value "$9$zopTn9t1RSM87uO87-V4oz369uO"
+set system ntp server 10.23.250.1 key 1
+set system ntp server 10.23.250.2 key 1
+set system ntp trusted-key 1
+set snmp location b171-vault
+set snmp v3 usm local-engine user SPECTRUM-RTR authentication-md5 authentication-key "$9$wzY2aJGDjk.WLDiqmTQcyrevLVb2oaUylLN-V4o/CAp0IhSrlM8yrZUiH5TlKvW7-Vb2JUjY2aUDif5Srle8XN-waGDg4ZjikTQFn/AtOSreWX7Eh24oJHktu0BhSWLx7VwuOdbwYZGn/9pIESreXxd8LDikmTQFn/t1RylK7dbrlGDikTQRhcSvW"
+set snmp v3 vacm security-to-group security-model usm security-name SPECTRUM-RTR group SNMPV3Group
+set snmp v3 vacm access group SNMPV3Group default-context-prefix security-model usm security-level authentication read-view all
+set snmp v3 vacm access group SNMPV3Group default-context-prefix security-model usm security-level authentication notify-view all
+set snmp v3 target-address SOLARWINDS address 192.168.88.15
+set snmp v3 target-address SOLARWINDS tag-list chassis-trap-receivers
+set snmp v3 target-address SOLARWINDS target-parameters noc-snmpv3-settings
+set snmp v3 target-parameters noc-snmpv3-settings parameters message-processing-model v3
+set snmp v3 target-parameters noc-snmpv3-settings parameters security-model usm
+set snmp v3 target-parameters noc-snmpv3-settings parameters security-level authentication
+set snmp v3 target-parameters noc-snmpv3-settings parameters security-name SPECTRUM-RTR
+set snmp v3 target-parameters noc-snmpv3-settings notify-filter chassis-traps
+set snmp v3 notify chassis-trap-list type trap
+set snmp v3 notify chassis-trap-list tag chassis-trap-receivers
+set snmp v3 notify config-trap-list type trap
+set snmp v3 notify config-trap-list tag config-trap-receivers
+set snmp v3 notify-filter chassis-traps oid jnxChassisTraps include
+set snmp v3 notify-filter chassis-traps oid jnxChassisOKTraps include
+set snmp v3 notify-filter chassis-traps oid .1
+set snmp v3 notify-filter config-traps oid jnxCmNotifications include
+set snmp view all oid .1 include
+set snmp view all oid jnxBoxAnatomy include
+set snmp view all oid snmpMIBObjects include
+set snmp view all oid system
+set snmp community abcv2
+set snmp trap-options source-address 192.168.88.51
