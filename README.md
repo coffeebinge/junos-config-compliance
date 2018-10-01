@@ -1,6 +1,6 @@
 # junos config compliance
 
-The goal:
+#### The goal
 
 To be able to validate that our switches are running a standard config. If not, generate a config file to correct for missing lines or remove lines that should not be there. Use an ansible playbook to compare the "golden config" to the device's committed config and build set/delete remediation. This example uses a source golden config that only comprises of the system and snmp top level sections.
 
@@ -46,8 +46,104 @@ Another reason to use only the junoser output is the difference in the schema co
  ### example display set from junoser
  set system ntp authentication-key 1 type md5 value "$9$zopTn9t1RSM87uO87-V4oz369uO"
 ```
+#### Example playbook run
+```
+ansible@control:~/projects/diff$ ansible-playbook pb-junos-diff.yml
 
-notes for later/cleanup:
+PLAY [Juniper compliance check] ******************************************************************************************
+
+TASK [Clean diff directory] **********************************************************************************************
+changed: [dc1-leaf1b -> localhost]
+ok: [dc1-leaf1a -> localhost]
+
+TASK [Create diff directory] *********************************************************************************************
+changed: [dc1-leaf1a -> localhost]
+ok: [dc1-leaf1b -> localhost]
+
+TASK [generate] **********************************************************************************************************
+changed: [dc1-leaf1a -> localhost]
+changed: [dc1-leaf1b -> localhost]
+
+TASK [convert golden config to set format] *******************************************************************************
+changed: [dc1-leaf1a -> localhost]
+changed: [dc1-leaf1b -> localhost]
+
+TASK [saving existing config from remote device to compare] **************************************************************
+ok: [dc1-leaf1b]
+ok: [dc1-leaf1a]
+
+TASK [convert device config to set format] *******************************************************************************
+changed: [dc1-leaf1a -> localhost]
+changed: [dc1-leaf1b -> localhost]
+
+TASK [saving temporarily loaded config from device] **********************************************************************
+changed: [dc1-leaf1a]
+changed: [dc1-leaf1b]
+
+TASK [convert golden config to set format] *******************************************************************************
+changed: [dc1-leaf1a -> localhost]
+changed: [dc1-leaf1b -> localhost]
+
+PLAY [compare] ***********************************************************************************************************
+
+TASK [script] ************************************************************************************************************
+changed: [dc1-leaf1a -> localhost]
+changed: [dc1-leaf1b -> localhost]
+
+TASK [debug] *************************************************************************************************************
+ok: [dc1-leaf1a] => {
+    "msg": [
+        "set system domain-name arpthis.net",
+        "delete system domain-name arpthis.org",
+        "set system name-server 8.8.4.4",
+        "delete system name-server 8.8.3.3",
+        "set system login message \"\\n\\n\\n\\t       * * *  W A R N I N G  * * *\\n\\tProperty of the ABC CORP\\n\\nIf you are not authorized to access this system, disconnect now.\\nUsers of this system have no expectation of privacy. By continuing,\\nyou consent to your keystrokes and data content being monitored.\\n\\n\"",
+        "set system ntp server 10.23.250.1 key 1",
+        "delete system ntp server 1.1.1.1",
+        "delete snmp community secondbadpassword",
+        "delete snmp community \"abcv2@#$asdf\""
+    ]
+}
+ok: [dc1-leaf1b] => {
+    "msg": [
+        "set system login message \"\\n\\n\\n\\t       * * *  W A R N I N G  * * *\\n\\tProperty of the ABC CORP\\n\\nIf you are not authorized to access this system, disconnect now.\\nUsers of this system have no expectation of privacy. By continuing,\\nyou consent to your keystrokes and data content being monitored.\\n\\n\"",
+        "delete system ntp server 2.2.2.2"
+    ]
+}
+
+PLAY [compare - output to files] *****************************************************************************************
+
+TASK [script] ************************************************************************************************************
+changed: [dc1-leaf1a -> localhost]
+changed: [dc1-leaf1b -> localhost]
+
+PLAY RECAP ***************************************************************************************************************
+dc1-leaf1a                 : ok=11   changed=8    unreachable=0    failed=0
+dc1-leaf1b                 : ok=11   changed=8    unreachable=0    failed=0
+```
+
+#### example raw diff without set/delete conversion
+```
+commented out the following in junos-diff.py
+#        elif line.strip().startswith('-set'):
+#            line = line.replace('-set','set')
+#        elif line.strip().startswith('+set'):
+#            line = line.replace('+set','delete')
+```
+```
+ansible@control:~/projects/diff$ ./junos-diff.py ./tmp/pb-junos-diff/dc1-leaf1a.gold.set ./tmp/pb-junos-diff/dc1-leaf1a.device.set
+-set system domain-name arpthis.net
++set system domain-name arpthis.org
+-set system name-server 8.8.4.4
++set system name-server 8.8.3.3
+-set system login message "\n\n\n\t       * * *  W A R N I N G  * * *\n\tProperty of the ABC CORP\n\nIf you are not authorized to access this system, disconnect now.\nUsers of this system have no expectation of privacy. By continuing,\nyou consent to your keystrokes and data content being monitored.\n\n"
+-set system ntp server 10.23.250.1 key 1
++set system ntp server 1.1.1.1
++set snmp community secondbadpassword
++set snmp community "abcv2@#$asdf"
+```
+
+#### notes for later/cleanup:
 * clean up playbook, local_action/delegate
 * need to handle stripping certain items from comparison (example: don't compare snmpv3 user credentials... the key always changes per device)
 
