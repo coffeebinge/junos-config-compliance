@@ -13,7 +13,7 @@ To be able to validate that our switches are running a standard config. If not, 
 
 Next steps will be to provide a way for a human to "OK" the change for initial runs and subsequent playbook task to push the change.
 
-Ultimately, I want to create a better way to handle the comparison. I'd rather use a json output to do the diff since it would be wells structured, but there are a few things I need to get past in order to be able to do this. Mainly, the source template to use for comparison and the task of figuring out how to build the set/delete actions for cleanup.
+Ultimately, I want to create a better way to handle the comparison. I'd rather use a json output to do the diff since it would be well structured, but there are a few things I need to get past in order to be able to do this. Mainly, the source template to use for comparison and the task of figuring out how to build the set/delete actions for cleanup.
 
 
 **1 - the reason we need to load the config on the device and then grab the candidate for conversion/comparison is the way Junos handles quotation. For instance:
