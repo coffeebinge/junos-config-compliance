@@ -2,7 +2,7 @@
 
 #### The goal
 
-To be able to validate that our switches are running a standard config. If not, generate a config file to correct for missing lines or remove lines that should not be there. Use an ansible playbook to compare the "golden config" to the device's committed config and build set/delete remediation. This example uses a source golden config that only comprises of the system and snmp top level sections.
+To be able to validate that our switches are running a standard config. If not, generate a config file to correct for missing lines or remove lines that should not be there. Use an ansible playbook to compare the "golden config" to the device's committed config and build set/delete remediation. This example uses a source golden config that only contains the system and snmp top level sections.
 
 1. Generate a junos config (stanza format) based on standard jinja2 template using device personality parameters. This is the golden config.
 2. Pull existing config from each device
