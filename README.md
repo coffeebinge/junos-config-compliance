@@ -45,7 +45,11 @@ Another reason to use only the junoser output is the difference in the schema co
 
  ### example display set from junoser
  set system ntp authentication-key 1 type md5 value "$9$zopTn9t1RSM87uO87-V4oz369uO"
+
 ```
+### NOTE: 
+since we need to sort the lines in order to get a clean diff, this messes with the order of firewall entries. This will break anything that needs to be applied in a specific order. My suggestions, if you use this tool, is to only use this to get an idea of what's missing. Perhaps we evaluate firewall, route policies, etc.. in a different way. I'll try to think of another way to deal with this.
+
 #### Example playbook run
 ```
 ansible@control:~/projects/diff$ ansible-playbook pb-junos-diff.yml
