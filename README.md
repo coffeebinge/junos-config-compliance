@@ -19,7 +19,7 @@ Ultimately, I want to create a better way to handle the comparison. I'd rather u
 **1 - the reason we need to load the config on the device and then grab the candidate for conversion/comparison is the way Junos handles quotation. For instance:
 
 ```
-ansible@dc1-leaf1a# set interfaces ge-0/0/1 description "test-server"
+ansible@dc1-leaf1a# set interfaces ge-0/0/0 description "test server one"
 
 {master:0}[edit]
 ansible@dc1-leaf1a# set interfaces ge-0/0/1 description "test-server-two"
